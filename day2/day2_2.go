@@ -8,13 +8,7 @@ import (
 	"strings"
 )
 
-var MaxColors = map[string]int{
-  "blue": 14,
-  "green": 13,
-  "red": 12,
-}
-
-func Day2_1() int {
+func Day2_2() int {
   file, err := os.Open("day2.txt")
   if err != nil {
     log.Fatal(err)
@@ -27,12 +21,14 @@ func Day2_1() int {
     line := scanner.Text()
     splitLine := strings.Split(line, ":")
 
-    gameId := strings.Split(splitLine[0], " ")[1]
-    intGameId, _ := strconv.Atoi(gameId)
-
     gamesString := strings.Split(splitLine[1], ";")
 
-    playIsValid := true
+    gameMinimumSet := map[string]int{
+      "blue": 1,
+      "green": 1,
+      "red": 1,
+    }
+
     for _, gameString := range gamesString {
       playsString := strings.Split(gameString, ",")
 
@@ -43,15 +39,13 @@ func Day2_1() int {
         color := splitedPlay[1]
         number, _ := strconv.Atoi(splitedPlay[0])
 
-        if number > MaxColors[color] {
-          playIsValid = false
+        if number > gameMinimumSet[color] {
+          gameMinimumSet[color] = number
         }
       }
     }
 
-    if playIsValid {
-      validGamesSum += intGameId
-    }
+    validGamesSum += gameMinimumSet["blue"] * gameMinimumSet["green"] * gameMinimumSet["red"]
   }
 
   if err := scanner.Err(); err != nil {
