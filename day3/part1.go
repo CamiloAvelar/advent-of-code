@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -18,8 +17,8 @@ func Part1() int {
   defer file.Close()
 
   responseSum := 0
-  symbolsLinesBuffer := make([][]int, 3)
-  numbersLinesBuffer := make([][]struct{number, index int}, 3)
+  symbolsLinesBuffer := make([][]int, 2)
+  numbersLinesBuffer := make([][]struct{number, index int}, 2)
   scanner := bufio.NewScanner(file)
   for scanner.Scan() {
     line := scanner.Text()
@@ -31,22 +30,33 @@ func Part1() int {
       }
     }
 
-    symbolsLinesBuffer = append(symbolsLinesBuffer[1:3], symbolsIndexes)
-    fmt.Println(symbolsLinesBuffer)
+    symbolsLinesBuffer = append(symbolsLinesBuffer[1:2], symbolsIndexes)
 
     numbersIndexes := extractNumbersIndexes(line)
-    numbersLinesBuffer = append(numbersLinesBuffer[1:3], numbersIndexes)
-    fmt.Println(numbersLinesBuffer)
-    fmt.Println()
+    numbersLinesBuffer = append(numbersLinesBuffer[1:2], numbersIndexes)
 
-    if len(numbersLinesBuffer[1]) > 0 { //TODO: change verification to check always on new line or symbol detected
+    if (len(symbolsLinesBuffer[0]) > 0 || len(symbolsLinesBuffer[1]) > 0) && len(numbersLinesBuffer[0]) > 0 {
+      actualLine := numbersLinesBuffer[0]
+      for _, symbolIndexes := range symbolsLinesBuffer {
+        for _, symbolIndex := range symbolIndexes { 
+          for lineIndex, lineNumber := range actualLine {
+            if lineNumber.index - 1 <= symbolIndex && symbolIndex <= lineNumber.index + len(strconv.Itoa(lineNumber.number)) {
+              responseSum += lineNumber.number
+              actualLine[lineIndex] = struct{number, index int}{}
+            }
+          }
+        }
+      }
+    }
+
+    if len(numbersLinesBuffer[1]) > 0 {
       actualLine := numbersLinesBuffer[1]
       for _, symbolIndexes := range symbolsLinesBuffer {
         for _, symbolIndex := range symbolIndexes { 
-          for _, lineNumber := range actualLine {
-            if lineNumber.index <= symbolIndex + 1 && symbolIndex <= lineNumber.index + len(strconv.Itoa(lineNumber.number)) + 1 {
-              fmt.Println(lineNumber.number)
+          for lineIndex, lineNumber := range actualLine {
+            if lineNumber.index - 1 <= symbolIndex && symbolIndex <= lineNumber.index + len(strconv.Itoa(lineNumber.number)) {
               responseSum += lineNumber.number
+              actualLine[lineIndex] = struct{number, index int}{}
             }
           }
         }
@@ -62,13 +72,13 @@ func Part1() int {
 }
 
 func isSymbol(str rune) bool {
-  return !unicode.IsNumber(str) && string(str) != "."
+  return !unicode.IsDigit(str) && string(str) != "."
 }
 
 func extractNumbers(str string) []string {
-  	f := func(c rune) bool {
-		return !unicode.IsLetter(c) && !unicode.IsNumber(c)
-	}
+  f := func(c rune) bool {
+    return !unicode.IsLetter(c) && !unicode.IsNumber(c)
+  }
 
   return strings.FieldsFunc(str, f)
 }
@@ -81,6 +91,7 @@ func extractNumbersIndexes(line string) []struct{number, index int} {
     infos := struct{number, index int}{}
     infos.number, _ = strconv.Atoi(str)
     infos.index = strings.Index(line, str)
+    line = strings.Replace(line, str, strings.Repeat(".", len(str)) ,1)
 
     response[index] = infos
   }
