@@ -18,7 +18,7 @@ func Part1() int {
 
   responseSum := 0
   symbolsLinesBuffer := make([][]int, 2)
-  numbersLinesBuffer := make([][]struct{number, index int}, 2)
+  numbersLinesBuffer := make([][]Numbers, 2)
   scanner := bufio.NewScanner(file)
   for scanner.Scan() {
     line := scanner.Text()
@@ -42,7 +42,7 @@ func Part1() int {
           for lineIndex, lineNumber := range actualLine {
             if lineNumber.index - 1 <= symbolIndex && symbolIndex <= lineNumber.index + len(strconv.Itoa(lineNumber.number)) {
               responseSum += lineNumber.number
-              actualLine[lineIndex] = struct{number, index int}{}
+              actualLine[lineIndex] = Numbers{}
             }
           }
         }
@@ -56,7 +56,7 @@ func Part1() int {
           for lineIndex, lineNumber := range actualLine {
             if lineNumber.index - 1 <= symbolIndex && symbolIndex <= lineNumber.index + len(strconv.Itoa(lineNumber.number)) {
               responseSum += lineNumber.number
-              actualLine[lineIndex] = struct{number, index int}{}
+              actualLine[lineIndex] = Numbers{}
             }
           }
         }
@@ -83,9 +83,9 @@ func extractNumbers(str string) []string {
   return strings.FieldsFunc(str, f)
 }
 
-func extractNumbersIndexes(line string) []struct{number, index int} {
+func extractNumbersIndexes(line string) []Numbers {
   strs := extractNumbers(line)
-  response := make([]struct{number, index int}, len(strs))
+  response := make([]Numbers, len(strs))
 
   for index, str := range strs {
     infos := struct{number, index int}{}
